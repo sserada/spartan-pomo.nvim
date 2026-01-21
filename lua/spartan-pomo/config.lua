@@ -35,6 +35,8 @@ local default_ascii_art = {
 ---@field break_time number Break duration in minutes
 ---@field long_break_time number Long break duration in minutes
 ---@field long_break_interval number Number of pomodoros before long break
+---@field auto_continue boolean Enable auto-continue after breaks
+---@field auto_continue_delay number Delay in seconds before auto-start
 ---@field ascii_art string[] ASCII art to display during break
 ---@field messages table Messages for notifications
 ---@field emergency_key string Key sequence for emergency exit
@@ -44,6 +46,10 @@ M.defaults = {
   break_time = 5,
   long_break_time = 15,
   long_break_interval = 4,
+
+  -- Auto-continue settings
+  auto_continue = false,
+  auto_continue_delay = 3,
 
   -- UI settings
   ascii_art = default_ascii_art,
@@ -55,6 +61,7 @@ M.defaults = {
     break_start = "Break time! Rest for %d minutes.",
     long_break_start = "Long break time! Rest for %d minutes. (%d/%d pomodoros completed)",
     break_end = "Break over! Ready to work again.",
+    auto_continue_countdown = "Starting next session in %d...",
     session_stop = "Pomodoro session stopped.",
   },
 
