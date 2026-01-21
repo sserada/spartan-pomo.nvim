@@ -130,6 +130,16 @@ ascii_art ~
   Stop the current Pomodoro session. If in break mode, the blocker
   will be hidden immediately.
 
+                                                              *:SpartanPause*
+:SpartanPause
+  Pause the current Pomodoro session. Timer stops and blocker hides
+  (if active). Remaining time is preserved.
+
+                                                             *:SpartanResume*
+:SpartanResume
+  Resume the paused Pomodoro session. Timer continues from where it
+  was paused. Blocker shows again if it was a break session.
+
                                                              *:SpartanStatus*
 :SpartanStatus
   Display the current session status (state, remaining time, and
@@ -169,6 +179,14 @@ get_status()
                                                   *spartan-pomo.reset_count()*
 reset_count()
   Reset the completed Pomodoro count to 0.
+
+                                                        *spartan-pomo.pause()*
+pause()
+  Pause the current Pomodoro session.
+
+                                                       *spartan-pomo.resume()*
+resume()
+  Resume the paused Pomodoro session.
 
                                                    *spartan-pomo.get_config()*
 get_config()

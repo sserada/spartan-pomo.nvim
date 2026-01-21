@@ -124,6 +124,8 @@ require("spartan-pomo").setup({
 |---------|-------------|
 | `:SpartanStart` | Start a Pomodoro session |
 | `:SpartanStop` | Stop the current session |
+| `:SpartanPause` | Pause the current session |
+| `:SpartanResume` | Resume the paused session |
 | `:SpartanStatus` | Show current session status and completed count |
 | `:SpartanReset` | Reset completed Pomodoro count |
 
@@ -142,6 +144,8 @@ local pomo = require("spartan-pomo")
 
 pomo.start()        -- Start a session
 pomo.stop()         -- Stop the session
+pomo.pause()        -- Pause the current session
+pomo.resume()       -- Resume the paused session
 pomo.reset_count()  -- Reset completed count
 pomo.get_status()   -- Get current status {state, remaining, remaining_seconds, completed_count}
 pomo.get_config()   -- Get current configuration
