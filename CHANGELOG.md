@@ -16,6 +16,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `:SpartanReset` command to reset completed count
 - `reset_count()` Lua API function
 - Completed count in `:SpartanStatus` output and `get_status()` API
+- Auto-continue feature to automatically start next session after break
+- `auto_continue` configuration option (default: false)
+- `auto_continue_delay` configuration option (default: 3 seconds)
+- Countdown notification before auto-start
+- Auto-continue can be cancelled with `:SpartanStop`
 
 ## [1.0.0] - 2025-01-22
 
