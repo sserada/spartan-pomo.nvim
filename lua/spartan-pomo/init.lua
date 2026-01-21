@@ -84,7 +84,10 @@ function M.start()
 
   -- Don't start if already running
   if timer.is_running() then
-    notify("Pomodoro is already running! (" .. timer.state .. ": " .. timer.get_remaining_display() .. ")", vim.log.levels.WARN)
+    notify(
+      "Pomodoro is already running! (" .. timer.state .. ": " .. timer.get_remaining_display() .. ")",
+      vim.log.levels.WARN
+    )
     return
   end
 

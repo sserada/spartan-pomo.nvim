@@ -36,24 +36,28 @@ function M.start(duration_minutes, on_tick, on_complete)
   M._timer = uv.new_timer()
 
   -- Start timer: 1000ms delay, then repeat every 1000ms
-  M._timer:start(1000, 1000, vim.schedule_wrap(function()
-    M.remaining = M.remaining - 1
+  M._timer:start(
+    1000,
+    1000,
+    vim.schedule_wrap(function()
+      M.remaining = M.remaining - 1
 
-    -- Call tick callback if provided
-    if M._on_tick then
-      M._on_tick(M.remaining)
-    end
-
-    -- Check if timer completed
-    if M.remaining <= 0 then
-      -- Save callback before stop() clears it
-      local on_complete = M._on_complete
-      M.stop()
-      if on_complete then
-        on_complete()
+      -- Call tick callback if provided
+      if M._on_tick then
+        M._on_tick(M.remaining)
       end
-    end
-  end))
+
+      -- Check if timer completed
+      if M.remaining <= 0 then
+        -- Save callback before stop() clears it
+        local on_complete = M._on_complete
+        M.stop()
+        if on_complete then
+          on_complete()
+        end
+      end
+    end)
+  )
 end
 
 ---Stop the timer
