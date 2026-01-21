@@ -46,9 +46,11 @@ function M.start(duration_minutes, on_tick, on_complete)
 
     -- Check if timer completed
     if M.remaining <= 0 then
+      -- Save callback before stop() clears it
+      local on_complete = M._on_complete
       M.stop()
-      if M._on_complete then
-        M._on_complete()
+      if on_complete then
+        on_complete()
       end
     end
   end))
