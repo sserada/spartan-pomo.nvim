@@ -175,6 +175,62 @@ function M.reset_count()
   notify("Pomodoro count reset to 0.")
 end
 
+---Pause the current session
+function M.pause()
+  if not timer.is_running() then
+    notify("No active session to pause.", vim.log.levels.WARN)
+    return
+  end
+
+  if timer.is_paused() then
+    notify("Session is already paused.", vim.log.levels.WARN)
+    return
+  end
+
+  -- Cancel auto-continue countdown if active
+  cancel_countdown()
+
+  -- Pause timer
+  timer.pause()
+
+  -- Hide blocker UI if visible (during break)
+  if ui.is_visible() then
+    ui.hide()
+  end
+
+  notify("Session paused at " .. timer.get_remaining_display())
+end
+
+---Resume the paused session
+function M.resume()
+  if not timer.is_paused() then
+    notify("No paused session to resume.", vim.log.levels.WARN)
+    return
+  end
+
+  -- Get state before resuming
+  local was_break = timer._paused_state == "break"
+
+  -- Resume timer
+  timer.resume()
+
+  -- Show blocker UI if resuming during break
+  if was_break then
+    ui.show(timer.get_remaining_display(), emergency_stop)
+
+    -- Re-setup tick callback for UI updates
+    local original_on_tick = timer._on_tick
+    timer._on_tick = function(remaining)
+      ui.update_content(timer.get_remaining_display())
+      if original_on_tick then
+        original_on_tick(remaining)
+      end
+    end
+  end
+
+  notify("Session resumed - " .. timer.state .. ": " .. timer.get_remaining_display())
+end
+
 ---Get current status (for statusline integration)
 ---@return table {state: string, remaining: string, remaining_seconds: number}
 function M.get_status()
