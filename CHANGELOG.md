@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Long break support after configurable number of pomodoros
+- `long_break_time` configuration option (default: 15 minutes)
+- `long_break_interval` configuration option (default: 4 pomodoros)
+- Completed pomodoro counter tracking
+- `:SpartanReset` command to reset completed count
+- `reset_count()` Lua API function
+- Completed count in `:SpartanStatus` output and `get_status()` API
+
 ## [1.0.0] - 2025-01-22
 
 ### Added
