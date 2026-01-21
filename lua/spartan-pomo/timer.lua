@@ -3,7 +3,7 @@
 local M = {}
 
 ---@type uv_timer_t|nil
-M.timer = nil
+M._timer = nil
 
 ---@type number Remaining time in seconds
 M.remaining = 0
@@ -11,17 +11,61 @@ M.remaining = 0
 ---@type string Current state: "idle" | "work" | "break"
 M.state = "idle"
 
+---@type function|nil Callback for each tick
+M._on_tick = nil
+
+---@type function|nil Callback when timer completes
+M._on_complete = nil
+
 ---Start the timer
----@param duration number Duration in minutes
----@param on_tick function Callback for each second
+---@param duration_minutes number Duration in minutes
+---@param on_tick function|nil Callback for each second (receives remaining seconds)
 ---@param on_complete function Callback when timer completes
-function M.start(duration, on_tick, on_complete)
-  -- TODO: Implement with vim.uv.new_timer()
+function M.start(duration_minutes, on_tick, on_complete)
+  -- Stop any existing timer
+  M.stop()
+
+  M.remaining = duration_minutes * 60
+  M._on_tick = on_tick
+  M._on_complete = on_complete
+
+  -- Create a new timer using vim.uv (libuv)
+  M._timer = vim.uv.new_timer()
+
+  -- Start timer: 1000ms delay, then repeat every 1000ms
+  M._timer:start(1000, 1000, vim.schedule_wrap(function()
+    M.remaining = M.remaining - 1
+
+    -- Call tick callback if provided
+    if M._on_tick then
+      M._on_tick(M.remaining)
+    end
+
+    -- Check if timer completed
+    if M.remaining <= 0 then
+      M.stop()
+      if M._on_complete then
+        M._on_complete()
+      end
+    end
+  end))
 end
 
 ---Stop the timer
 function M.stop()
-  -- TODO: Implement
+  if M._timer then
+    M._timer:stop()
+    M._timer:close()
+    M._timer = nil
+  end
+  M._on_tick = nil
+  M._on_complete = nil
+end
+
+---Check if timer is running
+---@return boolean
+function M.is_running()
+  return M._timer ~= nil and M.remaining > 0
 end
 
 ---Get remaining time as formatted string
@@ -30,6 +74,16 @@ function M.get_remaining_display()
   local minutes = math.floor(M.remaining / 60)
   local seconds = M.remaining % 60
   return string.format("%02d:%02d", minutes, seconds)
+end
+
+---Get current state and remaining time for statusline
+---@return table {state: string, remaining: string, remaining_seconds: number}
+function M.get_status()
+  return {
+    state = M.state,
+    remaining = M.get_remaining_display(),
+    remaining_seconds = M.remaining,
+  }
 end
 
 return M
