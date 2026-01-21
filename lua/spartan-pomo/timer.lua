@@ -14,6 +14,9 @@ M.remaining = 0
 ---@type string Current state: "idle" | "work" | "break"
 M.state = "idle"
 
+---@type number Completed pomodoros count
+M.completed_count = 0
+
 ---@type function|nil Callback for each tick
 M._on_tick = nil
 
@@ -86,13 +89,19 @@ function M.get_remaining_display()
 end
 
 ---Get current state and remaining time for statusline
----@return table {state: string, remaining: string, remaining_seconds: number}
+---@return table {state: string, remaining: string, remaining_seconds: number, completed_count: number}
 function M.get_status()
   return {
     state = M.state,
     remaining = M.get_remaining_display(),
     remaining_seconds = M.remaining,
+    completed_count = M.completed_count,
   }
+end
+
+---Reset completed count
+function M.reset_count()
+  M.completed_count = 0
 end
 
 return M

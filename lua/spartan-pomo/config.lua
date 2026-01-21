@@ -33,6 +33,8 @@ local default_ascii_art = {
 ---@class SpartanPomoConfig
 ---@field work_time number Work session duration in minutes
 ---@field break_time number Break duration in minutes
+---@field long_break_time number Long break duration in minutes
+---@field long_break_interval number Number of pomodoros before long break
 ---@field ascii_art string[] ASCII art to display during break
 ---@field messages table Messages for notifications
 ---@field emergency_key string Key sequence for emergency exit
@@ -40,6 +42,8 @@ M.defaults = {
   -- Timer settings
   work_time = 25,
   break_time = 5,
+  long_break_time = 15,
+  long_break_interval = 4,
 
   -- UI settings
   ascii_art = default_ascii_art,
@@ -49,6 +53,7 @@ M.defaults = {
     work_start = "Pomodoro started! Focus for %d minutes.",
     work_end = "Time's up! Take a break.",
     break_start = "Break time! Rest for %d minutes.",
+    long_break_start = "Long break time! Rest for %d minutes. (%d/%d pomodoros completed)",
     break_end = "Break over! Ready to work again.",
     session_stop = "Pomodoro session stopped.",
   },
