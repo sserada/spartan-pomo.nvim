@@ -47,8 +47,12 @@ local function emergency_stop()
   notify("Emergency exit! Session stopped.", vim.log.levels.WARN)
 end
 
+-- Forward declarations
+local start_work
+local start_break
+
 ---Start break session
-local function start_break()
+start_break = function()
   local cfg = config.get()
   timer.state = "break"
 
@@ -112,7 +116,7 @@ local function start_break()
 end
 
 ---Start work session
-local function start_work()
+start_work = function()
   local cfg = config.get()
   timer.state = "work"
 
