@@ -1,6 +1,9 @@
----@mod spartan-pomo.timer Timer logic using vim.uv
+---@mod spartan-pomo.timer Timer logic using vim.uv/vim.loop
 
 local M = {}
+
+-- Compatibility: vim.uv (0.10+) or vim.loop (0.9.x)
+local uv = vim.uv or vim.loop
 
 ---@type uv_timer_t|nil
 M._timer = nil
@@ -29,8 +32,8 @@ function M.start(duration_minutes, on_tick, on_complete)
   M._on_tick = on_tick
   M._on_complete = on_complete
 
-  -- Create a new timer using vim.uv (libuv)
-  M._timer = vim.uv.new_timer()
+  -- Create a new timer using libuv
+  M._timer = uv.new_timer()
 
   -- Start timer: 1000ms delay, then repeat every 1000ms
   M._timer:start(1000, 1000, vim.schedule_wrap(function()

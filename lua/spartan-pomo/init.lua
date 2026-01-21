@@ -39,6 +39,9 @@ local function start_break()
   local cfg = config.get()
   timer.state = "break"
 
+  -- Initialize remaining time first (before showing UI)
+  timer.remaining = cfg.break_time * 60
+
   notify(string.format(cfg.messages.break_start, cfg.break_time), vim.log.levels.WARN)
 
   -- Show blocker UI with emergency exit callback
