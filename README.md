@@ -82,6 +82,10 @@ require("spartan-pomo").setup({
   long_break_time = 15,      -- Long break duration
   long_break_interval = 4,   -- Long break after N pomodoros
 
+  -- Auto-continue settings
+  auto_continue = true,       -- Auto-start next session after break
+  auto_continue_delay = 3,    -- Delay in seconds before auto-start
+
   -- Emergency exit key (for urgent situations only)
   emergency_key = "<Leader><Leader>q",
 
@@ -108,6 +112,8 @@ require("spartan-pomo").setup({
 | `break_time` | `5` | Break duration in minutes |
 | `long_break_time` | `15` | Long break duration in minutes |
 | `long_break_interval` | `4` | Number of pomodoros before long break |
+| `auto_continue` | `false` | Automatically start next session after break |
+| `auto_continue_delay` | `3` | Delay in seconds before auto-start |
 | `emergency_key` | `<Leader><Leader>q` | Key to exit break in emergencies |
 
 ## Usage

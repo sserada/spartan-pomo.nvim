@@ -12,6 +12,19 @@ local ui = require("spartan-pomo.ui")
 ---@type boolean Whether the plugin has been setup
 M._setup_done = false
 
+---@type uv_timer_t|nil Auto-continue countdown timer
+local _countdown_timer = nil
+
+---Cancel auto-continue countdown
+local function cancel_countdown()
+  if _countdown_timer then
+    local uv = vim.uv or vim.loop
+    _countdown_timer:stop()
+    _countdown_timer:close()
+    _countdown_timer = nil
+  end
+end
+
 ---Setup the plugin with user configuration
 ---@param opts table|nil User configuration
 function M.setup(opts)
@@ -34,8 +47,12 @@ local function emergency_stop()
   notify("Emergency exit! Session stopped.", vim.log.levels.WARN)
 end
 
+-- Forward declarations
+local start_work
+local start_break
+
 ---Start break session
-local function start_break()
+start_break = function()
   local cfg = config.get()
   timer.state = "break"
 
@@ -74,11 +91,32 @@ local function start_break()
     ui.hide()
 
     notify(cfg.messages.break_end)
+
+    -- Auto-continue if enabled
+    if cfg.auto_continue then
+      local countdown = cfg.auto_continue_delay
+      local uv = vim.uv or vim.loop
+      _countdown_timer = uv.new_timer()
+
+      _countdown_timer:start(
+        0,
+        1000,
+        vim.schedule_wrap(function()
+          if countdown > 0 then
+            notify(string.format(cfg.messages.auto_continue_countdown, countdown))
+            countdown = countdown - 1
+          else
+            cancel_countdown()
+            start_work()
+          end
+        end)
+      )
+    end
   end)
 end
 
 ---Start work session
-local function start_work()
+start_work = function()
   local cfg = config.get()
   timer.state = "work"
 
@@ -111,7 +149,10 @@ end
 
 ---Stop the current session
 function M.stop()
-  if not timer.is_running() then
+  -- Cancel auto-continue countdown if active
+  cancel_countdown()
+
+  if not timer.is_running() and not _countdown_timer then
     notify("No active Pomodoro session.", vim.log.levels.WARN)
     return
   end

@@ -89,6 +89,16 @@ long_break_interval ~
   Default: `4`
   Number of pomodoros before long break.
 
+auto_continue ~
+  Type: `boolean`
+  Default: `false`
+  Automatically start next session after break ends.
+
+auto_continue_delay ~
+  Type: `number`
+  Default: `3`
+  Delay in seconds before auto-start.
+
 emergency_key ~
   Type: `string`
   Default: `"<Leader><Leader>q"`
