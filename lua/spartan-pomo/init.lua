@@ -7,6 +7,7 @@ local M = {}
 
 local config = require("spartan-pomo.config")
 local timer = require("spartan-pomo.timer")
+local ui = require("spartan-pomo.ui")
 
 ---@type boolean Whether the plugin has been setup
 M._setup_done = false
@@ -25,6 +26,31 @@ local function notify(msg, level)
   vim.notify(msg, level or vim.log.levels.INFO, { title = "Spartan Pomo" })
 end
 
+---Start break session
+local function start_break()
+  local cfg = config.get()
+  timer.state = "break"
+
+  notify(string.format(cfg.messages.break_start, cfg.break_time), vim.log.levels.WARN)
+
+  -- Show blocker UI
+  ui.show(timer.get_remaining_display())
+
+  -- Start break timer with tick callback to update UI
+  timer.start(cfg.break_time, function(remaining)
+    -- Update UI every second
+    ui.update_content(timer.get_remaining_display())
+  end, function()
+    -- Break completed
+    timer.state = "idle"
+
+    -- Hide blocker UI
+    ui.hide()
+
+    notify(cfg.messages.break_end)
+  end)
+end
+
 ---Start work session
 local function start_work()
   local cfg = config.get()
@@ -36,23 +62,6 @@ local function start_work()
     -- Work time completed, start break
     notify(cfg.messages.work_end, vim.log.levels.WARN)
     start_break()
-  end)
-end
-
----Start break session
-function start_break()
-  local cfg = config.get()
-  timer.state = "break"
-
-  notify(string.format(cfg.messages.break_start, cfg.break_time), vim.log.levels.WARN)
-
-  -- TODO: Phase 3 - Show blocker UI here
-
-  timer.start(cfg.break_time, nil, function()
-    -- Break completed
-    timer.state = "idle"
-    notify(cfg.messages.break_end)
-    -- TODO: Phase 3 - Hide blocker UI here
   end)
 end
 
@@ -81,10 +90,13 @@ function M.stop()
   timer.stop()
   timer.state = "idle"
 
+  -- Hide blocker UI if visible
+  if ui.is_visible() then
+    ui.hide()
+  end
+
   local cfg = config.get()
   notify(cfg.messages.session_stop)
-
-  -- TODO: Phase 3 - Hide blocker UI here if visible
 end
 
 ---Get current status (for statusline integration)
