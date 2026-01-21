@@ -1,0 +1,201 @@
+*spartan-pomo.txt*  A Spartan-style Pomodoro timer for Neovim
+
+Author:   sserada
+License:  MIT
+Version:  1.0.0
+
+==============================================================================
+CONTENTS                                              *spartan-pomo-contents*
+
+  1. Introduction ............................ |spartan-pomo-introduction|
+  2. Requirements ............................ |spartan-pomo-requirements|
+  3. Installation ............................ |spartan-pomo-installation|
+  4. Configuration ........................... |spartan-pomo-configuration|
+  5. Commands ................................ |spartan-pomo-commands|
+  6. Lua API ................................. |spartan-pomo-api|
+  7. Highlights .............................. |spartan-pomo-highlights|
+  8. Statusline .............................. |spartan-pomo-statusline|
+
+==============================================================================
+1. INTRODUCTION                                   *spartan-pomo-introduction*
+
+spartan-pomo.nvim is a Pomodoro timer that forces you to take breaks.
+
+When break time arrives, your entire editor is blocked with a fullscreen
+overlay. No editing, no scrolling, no "just one more line" - your eyes
+and mind get the rest they need.
+
+==============================================================================
+2. REQUIREMENTS                                   *spartan-pomo-requirements*
+
+- Neovim >= 0.9.0
+
+==============================================================================
+3. INSTALLATION                                   *spartan-pomo-installation*
+
+Using lazy.nvim: >lua
+  {
+    "sserada/spartan-pomo.nvim",
+    cmd = { "SpartanStart", "SpartanStop", "SpartanStatus" },
+    opts = {
+      work_time = 25,
+      break_time = 5,
+    },
+    config = function(_, opts)
+      require("spartan-pomo").setup(opts)
+    end,
+  }
+<
+
+Using packer.nvim: >lua
+  use {
+    "sserada/spartan-pomo.nvim",
+    config = function()
+      require("spartan-pomo").setup({})
+    end,
+  }
+<
+
+==============================================================================
+4. CONFIGURATION                                 *spartan-pomo-configuration*
+
+Call the setup function with your preferred options: >lua
+  require("spartan-pomo").setup({
+    work_time = 25,
+    break_time = 5,
+    emergency_key = "<Leader><Leader>q",
+  })
+<
+
+                                                   *spartan-pomo-config-options*
+
+work_time ~
+  Type: `number`
+  Default: `25`
+  Work session duration in minutes.
+
+break_time ~
+  Type: `number`
+  Default: `5`
+  Break duration in minutes.
+
+emergency_key ~
+  Type: `string`
+  Default: `"<Leader><Leader>q"`
+  Key sequence to exit break mode in emergencies.
+
+messages ~
+  Type: `table`
+  Notification messages. Keys:
+  - `work_start`: Shown when work session starts
+  - `work_end`: Shown when work session ends
+  - `break_start`: Shown when break starts
+  - `break_end`: Shown when break ends
+  - `session_stop`: Shown when session is stopped
+
+ascii_art ~
+  Type: `table` (list of strings)
+  Custom ASCII art to display during break screen.
+
+==============================================================================
+5. COMMANDS                                           *spartan-pomo-commands*
+
+                                                              *:SpartanStart*
+:SpartanStart
+  Start a new Pomodoro session. If a session is already running,
+  displays a warning with the current status.
+
+                                                               *:SpartanStop*
+:SpartanStop
+  Stop the current Pomodoro session. If in break mode, the blocker
+  will be hidden immediately.
+
+                                                             *:SpartanStatus*
+:SpartanStatus
+  Display the current session status (state and remaining time).
+
+==============================================================================
+6. LUA API                                                 *spartan-pomo-api*
+
+                                                        *spartan-pomo.setup()*
+setup({opts})
+  Initialize the plugin with the given configuration.
+  Parameters: ~
+    {opts}  Configuration table (see |spartan-pomo-configuration|)
+
+                                                        *spartan-pomo.start()*
+start()
+  Start a new Pomodoro session.
+
+                                                         *spartan-pomo.stop()*
+stop()
+  Stop the current session.
+
+                                                   *spartan-pomo.get_status()*
+get_status()
+  Get the current session status.
+  Returns: ~
+    Table with fields:
+    - `state`: "idle", "work", or "break"
+    - `remaining`: Formatted time string (e.g., "24:59")
+    - `remaining_seconds`: Remaining time in seconds
+
+                                                   *spartan-pomo.get_config()*
+get_config()
+  Get the current configuration.
+  Returns: ~
+    Configuration table
+
+==============================================================================
+7. HIGHLIGHTS                                       *spartan-pomo-highlights*
+
+The following highlight groups can be customized:
+
+SpartanPomoBackground ~
+  Background color of the blocker window.
+  Default: `bg=#1a1a2e`
+
+SpartanPomoTitle ~
+  Color for ASCII art text.
+  Default: `fg=#ff6b6b, bold`
+
+SpartanPomoTimer ~
+  Color for the countdown timer.
+  Default: `fg=#4ecdc4, bold`
+
+SpartanPomoMessage ~
+  Color for the break message.
+  Default: `fg=#ffe66d`
+
+Example: >lua
+  vim.api.nvim_set_hl(0, "SpartanPomoBackground", { bg = "#000000" })
+  vim.api.nvim_set_hl(0, "SpartanPomoTimer", { fg = "#00ff00", bold = true })
+<
+
+==============================================================================
+8. STATUSLINE                                       *spartan-pomo-statusline*
+
+Example lualine.nvim integration: >lua
+  require("lualine").setup({
+    sections = {
+      lualine_x = {
+        {
+          function()
+            local status = require("spartan-pomo").get_status()
+            if status.state == "idle" then
+              return ""
+            end
+            local icon = status.state == "work" and "󰔟 " or "󰒲 "
+            return icon .. status.remaining
+          end,
+          cond = function()
+            return require("spartan-pomo").get_status().state ~= "idle"
+          end,
+        },
+      },
+    },
+  })
+<
+
+==============================================================================
+vim:tw=78:ts=8:ft=help:norl:
