@@ -3,6 +3,7 @@
 local M = {}
 
 local config = require("spartan-pomo.config")
+local blocker = require("spartan-pomo.blocker")
 
 ---@type number|nil Buffer number for the blocker window
 M._buf = nil
@@ -12,6 +13,9 @@ M._win = nil
 
 ---@type number|nil Namespace for highlights
 M._ns = nil
+
+---@type function|nil Callback when emergency exit is triggered
+M._on_emergency_exit = nil
 
 ---Get or create namespace for highlights
 ---@return number
@@ -56,7 +60,7 @@ local function build_content(remaining_display)
 
   -- Calculate vertical padding to center content
   local ascii_lines = cfg.ascii_art
-  local content_height = #ascii_lines + 6 -- ASCII + spacing + timer + message
+  local content_height = #ascii_lines + 8 -- ASCII + spacing + timer + message + hint
   local top_padding = math.floor((height - content_height) / 2)
 
   -- Add top padding
@@ -84,6 +88,13 @@ local function build_content(remaining_display)
   local message = "Take a break. Your eyes and mind need rest."
   table.insert(lines, center_text(message, width))
 
+  -- Add spacing
+  table.insert(lines, "")
+
+  -- Add emergency exit hint (centered, smaller)
+  local hint = "(Emergency exit: " .. cfg.emergency_key .. ")"
+  table.insert(lines, center_text(hint, width))
+
   -- Fill remaining space
   local remaining_lines = height - #lines
   for _ = 1, math.max(0, remaining_lines) do
@@ -101,12 +112,14 @@ end
 
 ---Show the fullscreen blocker window
 ---@param remaining_display string|nil Initial remaining time display
-function M.show(remaining_display)
+---@param on_emergency_exit function|nil Callback when emergency exit is triggered
+function M.show(remaining_display, on_emergency_exit)
   -- Don't create another window if already visible
   if M.is_visible() then
     return
   end
 
+  M._on_emergency_exit = on_emergency_exit
   setup_highlights()
 
   -- Create a new buffer
@@ -147,6 +160,14 @@ function M.show(remaining_display)
   -- Set initial content
   M.update_content(remaining_display or "05:00")
 
+  -- Enable input blocking
+  blocker.enable(M._buf, function()
+    -- Emergency exit callback
+    if M._on_emergency_exit then
+      M._on_emergency_exit()
+    end
+  end)
+
   -- Handle window resize
   vim.api.nvim_create_autocmd("VimResized", {
     buffer = M._buf,
@@ -167,6 +188,9 @@ end
 
 ---Hide the blocker window
 function M.hide()
+  -- Disable input blocking first
+  blocker.disable()
+
   if M._win and vim.api.nvim_win_is_valid(M._win) then
     vim.api.nvim_win_close(M._win, true)
   end
@@ -176,6 +200,7 @@ function M.hide()
     vim.api.nvim_buf_delete(M._buf, { force = true })
   end
   M._buf = nil
+  M._on_emergency_exit = nil
 end
 
 ---Update the displayed content with new remaining time

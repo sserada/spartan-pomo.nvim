@@ -26,6 +26,14 @@ local function notify(msg, level)
   vim.notify(msg, level or vim.log.levels.INFO, { title = "Spartan Pomo" })
 end
 
+---Emergency stop (called from blocker)
+local function emergency_stop()
+  timer.stop()
+  timer.state = "idle"
+  ui.hide()
+  notify("Emergency exit! Session stopped.", vim.log.levels.WARN)
+end
+
 ---Start break session
 local function start_break()
   local cfg = config.get()
@@ -33,8 +41,8 @@ local function start_break()
 
   notify(string.format(cfg.messages.break_start, cfg.break_time), vim.log.levels.WARN)
 
-  -- Show blocker UI
-  ui.show(timer.get_remaining_display())
+  -- Show blocker UI with emergency exit callback
+  ui.show(timer.get_remaining_display(), emergency_stop)
 
   -- Start break timer with tick callback to update UI
   timer.start(cfg.break_time, function(remaining)
