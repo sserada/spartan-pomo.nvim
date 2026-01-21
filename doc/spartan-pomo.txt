@@ -79,6 +79,16 @@ break_time ~
   Default: `5`
   Break duration in minutes.
 
+long_break_time ~
+  Type: `number`
+  Default: `15`
+  Long break duration in minutes.
+
+long_break_interval ~
+  Type: `number`
+  Default: `4`
+  Number of pomodoros before long break.
+
 emergency_key ~
   Type: `string`
   Default: `"<Leader><Leader>q"`
@@ -112,7 +122,12 @@ ascii_art ~
 
                                                              *:SpartanStatus*
 :SpartanStatus
-  Display the current session status (state and remaining time).
+  Display the current session status (state, remaining time, and
+  completed count).
+
+                                                              *:SpartanReset*
+:SpartanReset
+  Reset the completed Pomodoro count to 0.
 
 ==============================================================================
 6. LUA API                                                 *spartan-pomo-api*
@@ -139,6 +154,11 @@ get_status()
     - `state`: "idle", "work", or "break"
     - `remaining`: Formatted time string (e.g., "24:59")
     - `remaining_seconds`: Remaining time in seconds
+    - `completed_count`: Number of completed pomodoros
+
+                                                  *spartan-pomo.reset_count()*
+reset_count()
+  Reset the completed Pomodoro count to 0.
 
                                                    *spartan-pomo.get_config()*
 get_config()

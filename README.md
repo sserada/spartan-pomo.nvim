@@ -79,6 +79,8 @@ require("spartan-pomo").setup({
   -- Timer settings (in minutes)
   work_time = 25,
   break_time = 5,
+  long_break_time = 15,      -- Long break duration
+  long_break_interval = 4,   -- Long break after N pomodoros
 
   -- Emergency exit key (for urgent situations only)
   emergency_key = "<Leader><Leader>q",
@@ -88,6 +90,7 @@ require("spartan-pomo").setup({
     work_start = "Pomodoro started! Focus for %d minutes.",
     work_end = "Time's up! Take a break.",
     break_start = "Break time! Rest for %d minutes.",
+    long_break_start = "Long break time! Rest for %d minutes. (%d/%d pomodoros completed)",
     break_end = "Break over! Ready to work again.",
     session_stop = "Pomodoro session stopped.",
   },
@@ -103,6 +106,8 @@ require("spartan-pomo").setup({
 |--------|---------|-------------|
 | `work_time` | `25` | Work session duration in minutes |
 | `break_time` | `5` | Break duration in minutes |
+| `long_break_time` | `15` | Long break duration in minutes |
+| `long_break_interval` | `4` | Number of pomodoros before long break |
 | `emergency_key` | `<Leader><Leader>q` | Key to exit break in emergencies |
 
 ## Usage
@@ -113,7 +118,8 @@ require("spartan-pomo").setup({
 |---------|-------------|
 | `:SpartanStart` | Start a Pomodoro session |
 | `:SpartanStop` | Stop the current session |
-| `:SpartanStatus` | Show current session status |
+| `:SpartanStatus` | Show current session status and completed count |
+| `:SpartanReset` | Reset completed Pomodoro count |
 
 ### Suggested Keymaps
 
@@ -128,10 +134,11 @@ vim.keymap.set("n", "<Leader>pp", "<cmd>SpartanStatus<cr>", { desc = "Pomodoro S
 ```lua
 local pomo = require("spartan-pomo")
 
-pomo.start()       -- Start a session
-pomo.stop()        -- Stop the session
-pomo.get_status()  -- Get current status {state, remaining, remaining_seconds}
-pomo.get_config()  -- Get current configuration
+pomo.start()        -- Start a session
+pomo.stop()         -- Stop the session
+pomo.reset_count()  -- Reset completed count
+pomo.get_status()   -- Get current status {state, remaining, remaining_seconds, completed_count}
+pomo.get_config()   -- Get current configuration
 ```
 
 ## Statusline Integration

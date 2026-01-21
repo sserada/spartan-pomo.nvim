@@ -18,13 +18,21 @@ vim.api.nvim_create_user_command("SpartanStatus", function()
   local status = pomo.get_status()
 
   if status.state == "idle" then
-    vim.notify("No active Pomodoro session.", vim.log.levels.INFO, { title = "Spartan Pomo" })
+    vim.notify(
+      string.format("No active session. Completed: %d pomodoros", status.completed_count),
+      vim.log.levels.INFO,
+      { title = "Spartan Pomo" }
+    )
   else
     local state_display = status.state == "work" and "Working" or "Break"
     vim.notify(
-      string.format("%s - %s remaining", state_display, status.remaining),
+      string.format("%s - %s remaining (Completed: %d)", state_display, status.remaining, status.completed_count),
       vim.log.levels.INFO,
       { title = "Spartan Pomo" }
     )
   end
 end, { desc = "Show current Pomodoro status" })
+
+vim.api.nvim_create_user_command("SpartanReset", function()
+  require("spartan-pomo").reset_count()
+end, { desc = "Reset completed Pomodoro count" })

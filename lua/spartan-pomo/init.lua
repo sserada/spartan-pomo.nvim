@@ -39,16 +39,31 @@ local function start_break()
   local cfg = config.get()
   timer.state = "break"
 
-  -- Initialize remaining time first (before showing UI)
-  timer.remaining = cfg.break_time * 60
+  -- Increment completed count
+  timer.completed_count = timer.completed_count + 1
 
-  notify(string.format(cfg.messages.break_start, cfg.break_time), vim.log.levels.WARN)
+  -- Determine if this should be a long break
+  local is_long_break = timer.completed_count % cfg.long_break_interval == 0
+  local break_duration = is_long_break and cfg.long_break_time or cfg.break_time
+
+  -- Initialize remaining time first (before showing UI)
+  timer.remaining = break_duration * 60
+
+  -- Notify based on break type
+  if is_long_break then
+    notify(
+      string.format(cfg.messages.long_break_start, cfg.long_break_time, timer.completed_count, cfg.long_break_interval),
+      vim.log.levels.WARN
+    )
+  else
+    notify(string.format(cfg.messages.break_start, cfg.break_time), vim.log.levels.WARN)
+  end
 
   -- Show blocker UI with emergency exit callback
   ui.show(timer.get_remaining_display(), emergency_stop)
 
   -- Start break timer with tick callback to update UI
-  timer.start(cfg.break_time, function(remaining)
+  timer.start(break_duration, function(remaining)
     -- Update UI every second
     ui.update_content(timer.get_remaining_display())
   end, function()
@@ -111,6 +126,12 @@ function M.stop()
 
   local cfg = config.get()
   notify(cfg.messages.session_stop)
+end
+
+---Reset completed pomodoro count
+function M.reset_count()
+  timer.reset_count()
+  notify("Pomodoro count reset to 0.")
 end
 
 ---Get current status (for statusline integration)
