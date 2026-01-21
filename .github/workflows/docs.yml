@@ -1,0 +1,28 @@
+name: Documentation
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  check-docs:
+    name: Check Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check help files exist
+        run: |
+          if [ ! -f "doc/spartan-pomo.txt" ]; then
+            echo "Missing doc/spartan-pomo.txt"
+            exit 1
+          fi
+
+      - name: Check README
+        run: |
+          if [ ! -f "README.md" ]; then
+            echo "Missing README.md"
+            exit 1
+          fi
