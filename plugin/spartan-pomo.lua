@@ -23,6 +23,12 @@ vim.api.nvim_create_user_command("SpartanStatus", function()
       vim.log.levels.INFO,
       { title = "Spartan Pomo" }
     )
+  elseif status.state == "paused" then
+    vim.notify(
+      string.format("Paused - %s remaining (Completed: %d)", status.remaining, status.completed_count),
+      vim.log.levels.INFO,
+      { title = "Spartan Pomo" }
+    )
   else
     local state_display = status.state == "work" and "Working" or "Break"
     vim.notify(
@@ -36,3 +42,11 @@ end, { desc = "Show current Pomodoro status" })
 vim.api.nvim_create_user_command("SpartanReset", function()
   require("spartan-pomo").reset_count()
 end, { desc = "Reset completed Pomodoro count" })
+
+vim.api.nvim_create_user_command("SpartanPause", function()
+  require("spartan-pomo").pause()
+end, { desc = "Pause the current Pomodoro session" })
+
+vim.api.nvim_create_user_command("SpartanResume", function()
+  require("spartan-pomo").resume()
+end, { desc = "Resume the paused Pomodoro session" })

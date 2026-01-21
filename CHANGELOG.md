@@ -21,6 +21,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `auto_continue_delay` configuration option (default: 3 seconds)
 - Countdown notification before auto-start
 - Auto-continue can be cancelled with `:SpartanStop`
+- Pause/Resume functionality for handling interruptions
+- `:SpartanPause` command to pause current session
+- `:SpartanResume` command to resume paused session
+- `pause()` and `resume()` Lua API functions
+- Paused state preserves remaining time and callbacks
+- Blocker UI hides during pause and shows again on resume (for breaks)
 
 ## [1.0.0] - 2025-01-22
 
