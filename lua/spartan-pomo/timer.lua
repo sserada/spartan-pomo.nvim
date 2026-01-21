@@ -11,11 +11,17 @@ M._timer = nil
 ---@type number Remaining time in seconds
 M.remaining = 0
 
----@type string Current state: "idle" | "work" | "break"
+---@type string Current state: "idle" | "work" | "break" | "paused"
 M.state = "idle"
 
 ---@type number Completed pomodoros count
 M.completed_count = 0
+
+---@type boolean Whether timer is paused
+M._is_paused = false
+
+---@type string State before pause (to restore on resume)
+M._paused_state = nil
 
 ---@type function|nil Callback for each tick
 M._on_tick = nil
@@ -102,6 +108,87 @@ end
 ---Reset completed count
 function M.reset_count()
   M.completed_count = 0
+end
+
+---Pause the timer
+function M.pause()
+  if not M.is_running() or M._is_paused then
+    return false
+  end
+
+  -- Stop the timer but keep callbacks and remaining time
+  if M._timer then
+    M._timer:stop()
+    M._timer:close()
+    M._timer = nil
+  end
+
+  -- Save current state and mark as paused
+  M._paused_state = M.state
+  M.state = "paused"
+  M._is_paused = true
+
+  return true
+end
+
+---Resume the paused timer
+function M.resume()
+  if not M._is_paused then
+    return false
+  end
+
+  -- Restore state
+  M.state = M._paused_state
+  M._is_paused = false
+  M._paused_state = nil
+
+  -- Restart timer with remaining time
+  local remaining_minutes = M.remaining / 60
+  local on_tick = M._on_tick
+  local on_complete = M._on_complete
+
+  -- Clear callbacks temporarily to avoid stop() clearing them
+  M._on_tick = nil
+  M._on_complete = nil
+
+  -- Create new timer
+  M._timer = uv.new_timer()
+
+  -- Restore callbacks
+  M._on_tick = on_tick
+  M._on_complete = on_complete
+
+  -- Start timer
+  M._timer:start(
+    1000,
+    1000,
+    vim.schedule_wrap(function()
+      M.remaining = M.remaining - 1
+
+      -- Call tick callback if provided
+      if M._on_tick then
+        M._on_tick(M.remaining)
+      end
+
+      -- Check if timer completed
+      if M.remaining <= 0 then
+        -- Save callback before stop() clears it
+        local complete_callback = M._on_complete
+        M.stop()
+        if complete_callback then
+          complete_callback()
+        end
+      end
+    end)
+  )
+
+  return true
+end
+
+---Check if timer is paused
+---@return boolean
+function M.is_paused()
+  return M._is_paused
 end
 
 return M
